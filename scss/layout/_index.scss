@@ -1,0 +1,4 @@
+@forward "./grid" with (
+  $grid-gutter: 30px,
+  $grid-columns: 16
+);

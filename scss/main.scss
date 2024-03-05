@@ -1,0 +1,10 @@
+@use "./base";
+@use "./layout";
+
+.item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: orange;
+  height: 50px;
+}

@@ -1,0 +1,133 @@
+@use "sass:math";
+
+$grid-columns: 12 !default;
+$grid-gutter: 12px !default;
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+);
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px,
+);
+
+$gutters: (
+  0: 0,
+  1: 0.25,
+  2: 0.5,
+  3: 1,
+  4: 1.5,
+  5: 3,
+);
+
+@mixin make-media($size, $bypass: false) {
+  @if $bypass {
+    @content;
+  } @else {
+    @media (min-width: $size) {
+      @content;
+    }
+  }
+}
+
+@mixin make-row-cols($infix) {
+  @for $i from 1 through $grid-columns {
+    .row-cols#{$infix}-#{$i} > * {
+      width: math.div(100%, $i);
+    }
+  }
+}
+
+@mixin make-cols($infix) {
+  @for $i from 1 through $grid-columns {
+    .col#{$infix}-#{$i} {
+      flex: 0 0 auto;
+      width: math.div(100%, $grid-columns) * $i;
+    }
+  }
+}
+
+@mixin make-offsets($infix) {
+  @for $i from 1 to $grid-columns {
+    .offset#{$infix}-#{$i} {
+      flex: 0 0 auto;
+      margin-left: math.div(100%, $grid-columns) * $i;
+    }
+  }
+}
+
+@mixin make-gutters($infix) {
+  @each $i, $ratio in $gutters {
+    .g#{$infix}-#{$i},
+    .gx#{$infix}-#{$i} {
+      --gx: #{$grid-gutter * $ratio};
+    }
+
+    .g#{$infix}-#{$i},
+    .gy#{$infix}-#{$i} {
+      --gy: #{$grid-gutter * $ratio};
+    }
+  }
+}
+
+%gutter-padding {
+  padding: {
+    left: calc(var(--gy) / 2);
+    right: calc(var(--gy) / 2);
+  }
+}
+
+.container-fluid {
+  // @extend %gutter-padding;
+
+  --gx: #{$grid-gutter};
+  --gy: #{$grid-gutter};
+
+  width: 100%;
+  margin: {
+    left: auto;
+    right: auto;
+  }
+}
+
+.container {
+  @extend .container-fluid;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: {
+    top: calc(-1 * var(--gy));
+    left: calc(-1 * var(--gx) / 2);
+    right: calc(-1 * var(--gx) / 2);
+  }
+
+  > * {
+    @extend %gutter-padding;
+    margin-top: var(--gy);
+  }
+}
+
+@each $type, $breakpoint in $grid-breakpoints {
+  $infix: if($type==xs, "", -$type);
+  @include make-media($size: $breakpoint, $bypass: if($type==xs, true, false)) {
+    .container {
+      max-width: map-get($map: $container-max-widths, $key: $type);
+    }
+
+    @include make-row-cols($infix);
+    @include make-cols($infix);
+    @include make-offsets($infix);
+    @include make-gutters($infix);
+  }
+}
